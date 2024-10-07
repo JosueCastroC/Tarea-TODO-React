@@ -1,32 +1,26 @@
 import React, { Component } from 'react';
 import './assets/css/App.css';
-import 'bootstrap/dist/css/bootstrap.min.css'; //Es una libreria de diseño, Framework de front-end
+import 'bootstrap/dist/css/bootstrap.min.css'; 
 import axios from "axios";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
-//images
-//import logo from '../assets/img/pendientes.png'
 
 import Login from './components/Login';
-// import Dashboard from './components/Dashboard';
-// import Nuevo from './components/Nuevo';
-// import Editar from './components/Editar';
 
-//import {  BrowserRouter as Router , Routes, Route} from 'react-router-dom'
 
 const url="http://localhost:5131/api/Todo/";
 
 class App extends Component{
   state={
     data:[],
-    modalInsertar: false, //Estado para abrir y cerra metodo POST
-    modalEliminar: false, //Estado para abrir y cerrar metodo DELETE
-    form:{                //Este form guarda la informacion de nuestro estado
+    modalInsertar: false, 
+    modalEliminar: false, 
+    form:{                
       id: '',
       title: '',
       description: '',
-      tipoModal: ''  //Como reutilizamos el mismo Modal para POST y PUT, necesitamos un estado para diferenciar el tipo de modal que se requerira
+      tipoModal: ''  
     }
   }
 
@@ -34,60 +28,60 @@ class App extends Component{
     axios.get(url).then(response=>{
       this.setState({data: response.data});
       console.log(response.data);
-    }).catch(error=>{             //Se hace un manejo de errores
+    }).catch(error=>{             
       console.log(error.message);
     })
   }
 
-  peticionPost=async ()=>{        //Debe ser asincrona porque se ejecuta en segundo plano
-    delete this.state.form.id;    //Elimina nuestro atributo id, ya que lo asigna nuestra base de datos automaticamente
+  peticionPost=async ()=>{        
+    delete this.state.form.id;    
     await axios.post(url, this.state.form).then(response=>{
-      this.modalInsertar();       //Al momento que usuario inserte datos tenemos que cerrar el modal
-      this.peticionGet();         //Debemos hacer una solicitud Get para actualizar los datos
-    }).catch(error=>{             //Se hace un manejo de errores
+      this.modalInsertar();       
+      this.peticionGet();         
+    }).catch(error=>{             
       console.log(error.message);
     })
   }
 
   peticionPut=()=>{
-    axios.put(url+this.state.form.id, this.state.form).then(response=>{   //"url+this.state.form.id" es el formato para consumir a nuestra API. La data es nuestro estado form
-      this.modalInsertar();   //En caso de que la peticion sea exitosa, cierra el modal
-      this.peticionGet();     //Hace de nuevo la peticion GET para refrescar nuestra informacion
-    }).catch(error=>{             //Se hace un manejo de errores
+    axios.put(url+this.state.form.id, this.state.form).then(response=>{   
+      this.modalInsertar();   
+      this.peticionGet();     
+    }).catch(error=>{             
       console.log(error.message);
     })
   }
 
   peticionDelete=()=>{
-    axios.delete(url+this.state.form.id).then(response=>{ //Nuestra url es igual que en metodo PUT, pero en DELETE no tenemos ningun body que mandar, asi que solo
+    axios.delete(url+this.state.form.id).then(response=>{ 
       this.setState({modalEliminar: false});
       this.peticionGet();
-    }).catch(error=>{             //Se hace un manejo de errores
+    }).catch(error=>{             
       console.log(error.message);
     })
   }
 
-  modalInsertar=()=>{              {/*Este metodo 'modalInsertar' cambia en POST, el estado de true a false y viceversa*/}
+  modalInsertar=()=>{              
     this.setState({modalInsertar: !this.state.modalInsertar});
   }
 
-  seleccionarMiembro=(miembro)=>{  {/*Capturamos que miembro estamos seleccionando. Recibe al miembro y lo asigna a nuestro estado*/}
+  seleccionarMiembro=(miembro)=>{  
     this.setState({
       form: {
         id: miembro.id,
         title: miembro.title,
         description: miembro.description
       },      
-      tipoModal: 'actualizar',           //Establecemos el tipo de Modal, que en PUT es 'actualizar'
+      tipoModal: 'actualizar',           
     })
   }
 
-  handleChange=async e=>{                {/*Captura lo que el usuario escribe en los input POST*/}
+  handleChange=async e=>{               
     e.persist();
     await this.setState({
       form:{
-        ...this.state.form,              //Esta linea es para heredar todos los atributos que ya existan en el form y no se borren en el momento de que el usuario escriba
-        [e.target.name]: e.target.value  //Segun el title del input es como se guardara en el estado. Por ello es importante que el input se llame igual al estado donde se guarda la informacion
+        ...this.state.form,              
+        [e.target.name]: e.target.value  
       }
     });
     console.log(this.state.form);
@@ -98,17 +92,17 @@ class App extends Component{
   }
 
   render(){
-     const {form}=this.state; {/*Para abreviar los parametros de 'value' en los inputs*/}
+     const {form}=this.state; 
     return(
       <div className="App">
           <br/>
-          <button className="btn btn-success" onClick={()=>{this.setState({form: null, tipoModal: 'insertar'}); this.modalInsertar()}}>Agregar miembro</button> {/*Cuando se presiona el boton 'agregar miembro' se abre el modalInsertar. Cuando se hace click en agregar miembro tenemos que establecer el form en null para que entienda que nos referimos a la peticion POST*/}
+          <button className="btn btn-success" onClick={()=>{this.setState({form: null, tipoModal: 'insertar'}); this.modalInsertar()}}>Agregar Todo</button> 
           <br/><br/>
             <table className="table">
                 <thead>
                   <tr>
-                      <th>title</th>
-                      <th>description</th>
+                      <th>Título</th>
+                      <th>Descripción</th>
                       <th>Acciones</th>
                   </tr>
                 </thead>
@@ -119,7 +113,7 @@ class App extends Component{
                           <td>{miembro.title}</td>
                           <td>{miembro.description}</td>
                           <td>
-                              <button className="btn btn-primary" onClick={()=>{this.seleccionarMiembro(miembro); this.modalInsertar()}}><FontAwesomeIcon icon={faEdit}/></button> {/*Mandamos llamar 'seleccionarMiembro' para saber y registrar que miembro se va a editar*/}
+                              <button className="btn btn-primary" onClick={()=>{this.seleccionarMiembro(miembro); this.modalInsertar()}}><FontAwesomeIcon icon={faEdit}/></button> 
                               {"    "}
                               <button className="btn btn-danger" onClick={()=>{this.seleccionarMiembro(miembro); this.setState({modalEliminar: true})}}><FontAwesomeIcon icon={faTrashAlt}/></button>
                           </td>
@@ -130,19 +124,22 @@ class App extends Component{
                 </tbody>
             </table>
 
-            {/*Modal esta destinado para el metodo POST*/}
-            <Modal isOpen={this.state.modalInsertar}>       {/*'isOpen' pasa el estado para el Modal*/}
+            <Modal isOpen={this.state.modalInsertar}>       
                   <ModalHeader style={{display: 'block'}}>
                     <span style={{float: 'right'}}>x</span>
                   </ModalHeader>
                   <ModalBody>
                     <div className="form-group">
                         <br/>
-                        <label htmlFor="title">title</label>
-                        <input className="form-control" type="text" name="title" id="title" onChange={this.handleChange} value={form?form.title: ''}/> 
-                        <br/>   {/* Se agregaron los puntos y comillas en cada 'value' para diferenciar de cuando el form esta vacio o no, ya que cuando presionamos seleccionar  se cargan los valores, por el otro lado al insertar el form esta vacio debido a que el usuario lo tiene que digitar*/}
-                        <label htmlFor="description">description</label>
-                        <input className="form-control" type="text" name="description" id="description"onChange={this.handleChange} value={form?form.description:  ''}/>
+                        <div style={{display: 'flex', flexDirection: 'row', alignItems:'center', justifyContent:'space-between'}}>
+                        <label htmlFor="title">Título</label>
+                        <input className="form-control" style={{width: '350px'}} type="text" name="title" id="title" onChange={this.handleChange} value={form?form.title: ''}/> 
+                        </div>
+                        <br/>   
+                        <div style={{display: 'flex', flexDirection: 'row', alignItems:'center', justifyContent:'space-between'}}>
+                        <label htmlFor="description">Descripción</label>
+                        <input className="form-control" style={{width: '350px', display: 'flex', justifyContent: 'center'}} type="text" name="description" id="description"onChange={this.handleChange} value={form?form.description:  ''}/>
+                        </div>
                         <br/>
                     </div>
                   </ModalBody>
@@ -150,12 +147,11 @@ class App extends Component{
                   <ModalFooter>
                     {this.state.tipoModal=='insertar'? (
                       <button className="btn btn-success" onClick={()=>this.peticionPost()}>Insertar</button>) : (<button className="btn btn-primary" onClick={()=>this.peticionPut()}>Actualizar</button> 
-                    )}                                                                                         {/*Cuando se presiona el boton 'Insertar' se abre el modalInsertar*/}   {/*Hacemos llamar a nuestro metodo PUT con: "onClick={()=>this.peticionPut()}" */}
-                      <button className="btn btn-danger" onClick={()=>this.modalInsertar()}>Cancelar</button> {/*Cuando se presiona el boton 'Cancelar' se cierra el modalInsertar*/}
+                    )}                                                                                         
+                      <button className="btn btn-danger" onClick={()=>this.modalInsertar()}>Cancelar</button> 
                   </ModalFooter>
             </Modal>
 
-            {/*Este Modal se despliega cuando se va a eliminar a un usuario*/}
             <Modal isOpen={this.state.modalEliminar}> 
               <ModalBody>
                 Está seguro que desea eliminar al miembro {form && form.title}
@@ -169,21 +165,5 @@ class App extends Component{
     );
   }
 }
-
-// function App() {
-//   return (  //React.Fragment Es como un div, es una etiqueta propia de React. 
-//       <React.Fragment>    
-//           <Router>
-//             <Routes>
-//               {/*<Route path="/" element={<Login />}></Route>*/}
-//               <Route path="/dashboard" element={<Dashboard />}></Route>
-//               <Route path="/nuevo" element={<Nuevo />}></Route>
-//               <Route path="/editar" element={<Editar />}></Route>
-
-//             </Routes>
-//           </Router>
-//       </React.Fragment>
-//   );
-// }
 
 export default App;
